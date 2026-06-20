@@ -8,6 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ── NextAuth models ──────────────────────────────────────────────────────────
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -53,4 +55,102 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ── Lantern enums ────────────────────────────────────────────────────────────
+
+enum InsiderType {
+  POLITICIAN
+  EXECUTIVE
+  FUND_MANAGER
+}
+
+enum AssetType {
+  STOCK
+  OPTION
+  BOND
+  ETF
+  OTHER
+}
+
+enum TradeAction {
+  BUY
+  SELL
+  EXCHANGE
+}
+
+enum TradeSource {
+  HOUSE_CLERK
+  SENATE_EFD
+  SEC_FORM4
+  SEC_13F
+}
+
+enum RecommendedAction {
+  STRONG_FOLLOW
+  WEAK_FOLLOW
+  MONITOR
+  IGNORE
+}
+
+// ── Lantern models ─────────────────────────────────────────────────────────────
+
+model Insider {
+  id        String      @id @default(cuid())
+  name      String
+  type      InsiderType
+  imageUrl  String?
+  metadata  Json        @default("{}")
+  createdAt DateTime    @default(now())
+  trades    Trade[]
+}
+
+model Ticker {
+  symbol         String    @id
+  companyName    String?
+  sector         String?
+  industry       String?
+  cachedPrice    Decimal?  @db.Decimal(18, 4)
+  priceUpdatedAt DateTime?
+  createdAt      DateTime  @default(now())
+  trades         Trade[]   @relation("TickerTrades")
+}
+
+model Trade {
+  id             String      @id @default(cuid())
+  insiderId      String
+  insider        Insider     @relation(fields: [insiderId], references: [id], onDelete: Cascade)
+  ticker         String?
+  tickerRecord   Ticker?     @relation("TickerTrades", fields: [ticker], references: [symbol], onDelete: SetNull)
+  assetName      String
+  assetType      AssetType
+  action         TradeAction
+  amountLow      BigInt?
+  amountHigh     BigInt?
+  tradedAt       DateTime
+  reportedAt     DateTime
+  source         TradeSource
+  sourceUrl      String?
+  sourceFilingId String?     @unique
+  rawData        Json?
+  createdAt      DateTime    @default(now())
+  annotation     Annotation?
+
+  @@index([insiderId])
+  @@index([ticker])
+  @@index([tradedAt])
+  @@index([source])
+}
+
+model Annotation {
+  id                String            @id @default(cuid())
+  tradeId           String            @unique
+  trade             Trade             @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  significanceScore Int
+  summary           String
+  signalCategory    String[]
+  recommendedAction RecommendedAction
+  reasoning         String?
+  modelVersion      String?
+  generatedAt       DateTime          @default(now())
 }

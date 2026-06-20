@@ -13,7 +13,7 @@ import {
 } from "@/components/auth/auth-shell";
 import { isValidEmail, normalizeEmail } from "@/lib/auth-validation";
 
-export default function LoginPage() {
+export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
