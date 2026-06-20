@@ -134,14 +134,14 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 /**
  * Fetch a paginated list of trades with optional filters.
- * Returns the `items` array from the paginated response.
+ * Returns the full paginated response including total count.
  *
  * @example
- * const trades = await fetchTrades({ limit: 20, ticker: "NVDA", action: "buy" });
+ * const page = await fetchTradesPaginated({ limit: 20, ticker: "NVDA" });
  */
-export async function fetchTrades(
+export async function fetchTradesPaginated(
   params: FetchTradesParams = {}
-): Promise<Trade[]> {
+): Promise<PaginatedTrades> {
   const query = buildQuery({
     limit: params.limit,
     offset: params.offset,
@@ -150,7 +150,20 @@ export async function fetchTrades(
     source: params.source,
   });
 
-  const data = await apiFetch<PaginatedTrades>(`/trades${query}`);
+  return apiFetch<PaginatedTrades>(`/trades${query}`);
+}
+
+/**
+ * Fetch a paginated list of trades with optional filters.
+ * Returns the `items` array from the paginated response.
+ *
+ * @example
+ * const trades = await fetchTrades({ limit: 20, ticker: "NVDA", action: "buy" });
+ */
+export async function fetchTrades(
+  params: FetchTradesParams = {}
+): Promise<Trade[]> {
+  const data = await fetchTradesPaginated(params);
   return data.items;
 }
 

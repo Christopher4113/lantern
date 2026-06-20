@@ -3,7 +3,8 @@
 import { motion, type Variants } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import DigitalLoomBackground from "@/components/ui/digital-loom-background";
-import { TradeCard, type TradeCardProps } from "@/components/trade-card";
+import { TradeCard } from "@/components/trade-card";
+import type { Trade } from "@/lib/api";
 
 const fadeUpVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -19,7 +20,7 @@ const fadeUpVariants: Variants = {
 };
 
 type HeroSectionProps = {
-  featuredTrade: TradeCardProps;
+  featuredTrade: Trade;
 };
 
 export function HeroSection({ featuredTrade }: HeroSectionProps) {
@@ -100,7 +101,7 @@ export function HeroSection({ featuredTrade }: HeroSectionProps) {
             </div>
           </div>
           <div className="p-4 md:p-6">
-            <TradeCard {...featuredTrade} featured />
+            <TradeCard trade={featuredTrade} featured />
           </div>
         </div>
 
